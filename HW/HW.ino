@@ -14,6 +14,13 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 #define TRIG_PIN 5
 #define ECHO_PIN 18
 
+// 🔹 BIN ULTRASONICS
+#define FOOD_BIN_TRIG 25
+#define FOOD_BIN_ECHO 14
+
+#define DRY_BIN_TRIG 32
+#define DRY_BIN_ECHO 33  
+
 // 🔹 CAMERA CONNECTION
 #define CAM_TRIGGER 4
 #define FOOD_INPUT 26
@@ -30,7 +37,25 @@ Servo dryServo;
 long duration;
 float distance;
 
+bool foodBinFull = false;
+bool dryBinFull = false;
+
 bool systemBusy = false;
+
+float getDistance(int trigPin, int echoPin) {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 30000);
+  float dist = duration * 0.034 / 2;
+
+  return dist;
+}
 
 void moveServoSmooth(Servo &servo, int startAngle, int endAngle, int stepDelay) {
   if (startAngle < endAngle) {
@@ -55,10 +80,14 @@ void setup() {
 
   pinMode(CAM_TRIGGER, OUTPUT);
 
-  pinMode(CAM_TRIGGER, OUTPUT);
-
   foodServo.attach(FOOD_SERVO_PIN);
   dryServo.attach(DRY_SERVO_PIN);
+
+  pinMode(FOOD_BIN_TRIG, OUTPUT);
+  pinMode(FOOD_BIN_ECHO, INPUT);
+
+  pinMode(DRY_BIN_TRIG, OUTPUT);
+  pinMode(DRY_BIN_ECHO, INPUT);
 
   // Initial position (closed)
   foodServo.write(0);
@@ -125,6 +154,14 @@ void loop() {
   display.print(distance);
   display.println(" cm");
   display.display();
+
+  // 🔍 CONTINUOUS BIN MONITORING
+  float foodLevel = getDistance(FOOD_BIN_TRIG, FOOD_BIN_ECHO);
+  float dryLevel  = getDistance(DRY_BIN_TRIG, DRY_BIN_ECHO);
+
+  // Update status
+  foodBinFull = (foodLevel < 5);
+  dryBinFull  = (dryLevel < 5);
 
   // -------- DETECTION (DOUBLE CHECK) --------
   if (distance > 0 && distance < 10) {
@@ -202,21 +239,50 @@ void loop() {
       // -------- WAIT BEFORE OPENING --------
       delay(2000);
 
-      // -------- OPEN LID --------
-      Serial.println("Opening Lid...");
       display.clearDisplay();
       display.setCursor(0, 0);
-      display.println("Opening Lid...");
-      display.display();
 
-      // 🔥 Rotate correct servo
+      // 🔴 FOOD CASE
       if (isFood) {
+
+        if (foodBinFull) {
+          Serial.println("FOOD BIN FULL");
+          display.println("CANNOT OPEN");
+          display.println("FOOD BIN FULL");
+          display.display();
+
+          delay(2000);
+          systemBusy = false;
+          return;
+        }
+
+        Serial.println("Opening Food Lid...");
+        display.println("Opening Lid...");
+        display.display();
+
         moveServoSmooth(foodServo, 0, 180, 10);
       }
+
+      // 🔴 DRY CASE
       else if (isDry) {
+
+        if (dryBinFull) {
+          Serial.println("DRY BIN FULL");
+          display.println("CANNOT OPEN");
+          display.println("DRY BIN FULL");
+          display.display();
+
+          delay(2000);
+          systemBusy = false;
+          return;
+        }
+
+        Serial.println("Opening Dry Lid...");
+        display.println("Opening Lid...");
+        display.display();
+
         moveServoSmooth(dryServo, 0, 180, 10);
       }
-
       // Keep open for 5 seconds
       delay(5000);
 
