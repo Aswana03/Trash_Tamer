@@ -1,0 +1,468 @@
+/* ===== ULTRA PREMIUM UI ===== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+
+ /* ===== GOOGLE FONT ===== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+
+/* ===== RESET ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ===== BODY (LIGHT LOGIN BACKGROUND) ===== */
+body {
+  background: linear-gradient(120deg, #fdfbfb, #ebedee);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  animation: bgMove 6s infinite alternate;
+}
+
+/* BACKGROUND ANIMATION */
+@keyframes bgMove {
+  0% { background: linear-gradient(120deg, #fdfbfb, #ebedee); }
+  100% { background: linear-gradient(120deg, #e0f7fa, #ffffff); }
+}
+
+/* ===== HIDDEN ===== */
+.hidden {
+  display: none;
+}
+
+/* ===== CARD (LOGIN + SIGNUP) ===== */
+.card {
+  width: 330px;
+  padding: 25px;
+  border-radius: 25px;
+  background: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  text-align: center;
+  animation: fadeIn 0.8s ease;
+}
+
+/* ===== INPUT GROUP ===== */
+.input-group {
+  text-align: left;
+  margin-top: 12px;
+}
+
+/* LABEL */
+.input-group label {
+  font-size: 14px;
+  color: #555;
+}
+
+/* INPUT */
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 5px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: 0.3s;
+}
+
+/* INPUT FOCUS */
+input:focus {
+  border-color: #00c853;
+  box-shadow: 0 0 8px #00c85333;
+}
+
+/* ===== BUTTON ===== */
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  border-radius: 20px;
+  border: none;
+  background: linear-gradient(135deg, #00c853, #69f0ae);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* BUTTON HOVER */
+button:hover {
+  transform: scale(1.05);
+}
+
+/* LINK */
+p {
+  margin-top: 12px;
+  color: #00c853;
+  cursor: pointer;
+}
+
+/* ===== APP CONTAINER ===== */
+.app {
+  width: 360px;
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+/* ===== HEADER ===== */
+.header {
+  text-align: center;
+  color: white;
+  padding: 15px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #00c853, #64dd17);
+}
+
+/* ===== MAIN CARD ===== */
+.main-card {
+  margin: 12px;
+  padding: 18px;
+  border-radius: 25px;
+  background: rgba(255,255,255,0.3);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  animation: fadeIn 0.6s ease;
+}
+
+/* ===== STATUS ===== */
+.status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ===== BINS ===== */
+.bins {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.bin {
+  width: 48%;
+  text-align: center;
+}
+
+/* ===== BIN BOX ===== */
+.bin-box {
+  height: 160px;
+  border-radius: 25px;
+  background: rgba(255,255,255,0.4);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ===== FILL ===== */
+ .fill {
+  transform-origin: bottom center;
+}
+/* COLORS */
+.green {
+  background: linear-gradient(#00c853, #69f0ae);
+  box-shadow: 0 0 20px #00c853;
+}
+
+.red {
+  background: linear-gradient(#d50000, #ff5252);
+  box-shadow: 0 0 20px #ff5252;
+}
+
+/* ===== BLINK ALERT ===== */
+.blink {
+  animation: blinkAnim 0.6s infinite;
+}
+
+@keyframes blinkAnim {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+/* ===== MAP ===== */
+#map {
+  height: 230px;
+  border-radius: 20px;
+  margin-top: 15px;
+  border: 2px solid rgba(0,0,0,0.1);
+}
+
+/* ===== CHART ===== */
+canvas {
+  background: white;
+  border-radius: 20px;
+  padding: 10px;
+}
+
+/* ===== FLOATING NAV ===== */
+.bottom-nav {
+  position: fixed;
+  bottom: 15px;
+  width: 320px;
+  height: 70px;
+  background: white;
+  border-radius: 40px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* NAV ITEMS */
+.nav-item {
+  text-align: center;
+  font-size: 12px;
+  color: #777;
+  transition: 0.3s;
+}
+
+.nav-item .material-icons {
+  display: block;
+  font-size: 26px;
+}
+
+/* ACTIVE */
+.nav-item.active {
+  color: #00c853;
+  transform: translateY(-8px) scale(1.2);
+}
+
+/* ===== SCREENS ===== */
+.screen {
+  display: none;
+  animation: slideUp 0.5s ease;
+}
+
+.screen.active {
+  display: block;
+}
+
+/* ===== ALERT BACKGROUND ===== */
+.alert-bg {
+  background: linear-gradient(135deg, #ff1744, #ff5252) !important;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+#insightBox {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.7);
+  font-weight: 500;
+}
+/* BINS ALIGNMENT */
+.bins {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+/* BIN */
+.bin {
+  text-align: center;
+}
+
+/* BIN BOX */
+.bin-box {
+  width: 90px;
+  height: 130px;
+  border: 3px solid #333;
+  border-radius: 25px;
+  position: relative;
+  overflow: hidden;
+  background: #eee;
+  margin: auto;
+}
+
+/* FLOW ANIMATION */
+.fill {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 0%;
+  transition: height 0.8s ease-in-out;
+}
+
+/* COLORS */
+.green {
+  background: linear-gradient(to top, #00c853, #69f0ae);
+}
+
+.red {
+  background: linear-gradient(to top, #ff3d00, #ff8a65);
+}
+
+/* SYNC BUTTON CONTAINER */
+.sync-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* SMALL BUTTON */
+.sync-btn-small {
+  padding: 8px 20px;
+  font-size: 13px;
+  border-radius: 20px;
+  border: none;
+  background: black;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* HOVER EFFECT */
+.sync-btn-small:hover {
+  transform: scale(1.1);
+  background: #333;
+}
+.bin-box {
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+}
+/* WATER FILL */
+.fill {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 0%;
+  overflow: hidden;
+  transition: height 0.8s ease-in-out;
+}
+
+/* WAVE */
+.wave {
+  position: absolute;
+  width: 200%;
+  height: 100%;
+  top: -20px;
+  left: -50%;
+  background: rgba(255,255,255,0.4);
+  border-radius: 40%;
+  animation: waveMove 3s linear infinite;
+}
+
+/* SECOND WAVE (OPTIONAL FOR REAL EFFECT) */
+.wave::before {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 100%;
+  top: 10px;
+  left: -50%;
+  background: rgba(255,255,255,0.3);
+  border-radius: 45%;
+  animation: waveMove 4s linear infinite;
+}
+
+/* ANIMATION */
+@keyframes waveMove {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(50%);
+  }
+}
+.green {
+  background: linear-gradient(to top, #00c853, #69f0ae);
+}
+
+.red {
+  background: linear-gradient(to top, #ff3d00, #ff8a65);
+}
+/* ===== FINAL REAL WATER EFFECT FIX ===== */
+
+/* Strong visible fill */
+.fill {
+  position: absolute !important;
+  bottom: 0;
+  width: 100%;
+  height: 0%;
+  overflow: hidden;
+  transition: height 0.8s ease-in-out;
+}
+
+/* Strong water color */
+.green {
+  background: linear-gradient(to top, #00c853, #00e676) !important;
+}
+
+.red {
+  background: linear-gradient(to top, #ff3d00, #ff7043) !important;
+}
+
+/* 🌊 MAIN WAVE (STRONG) */
+.wave {
+  position: absolute;
+  width: 250%;
+  height: 120%;
+  top: -30px;
+  left: -75%;
+  background: rgba(255,255,255,0.7); /* strong white */
+  border-radius: 45%;
+  animation: waveMove 2s linear infinite;
+}
+
+/* 🌊 SECOND WAVE */
+.wave::before {
+  content: "";
+  position: absolute;
+  width: 250%;
+  height: 120%;
+  top: 15px;
+  left: -75%;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  animation: waveMove 3s linear infinite;
+}
+
+/* 🌊 THIRD WAVE (REAL DEPTH) */
+.wave::after {
+  content: "";
+  position: absolute;
+  width: 250%;
+  height: 120%;
+  top: 30px;
+  left: -75%;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  animation: waveMove 4s linear infinite;
+}
+
+/* 🔁 IMPROVED ANIMATION */
+@keyframes waveMove {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  100% {
+    transform: translateX(50%) rotate(360deg);
+  }
+}
+
+/* 🔥 ADD DEPTH INSIDE BIN */
+.bin-box {
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+}
+@keyframes tiltAnim {
+  0%   { transform: rotate(0deg) scale(1); }
+  25%  { transform: rotate(4deg) scale(1.02); }
+  50%  { transform: rotate(-4deg) scale(1.02); }
+  75%  { transform: rotate(2deg); }
+  100% { transform: rotate(0deg); }
+}

@@ -2,6 +2,11 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <ESP32Servo.h>
+#include <WiFiManager.h>
+
+
+const char* ssid = "YOUR_WIFI_NAME";
+const char* password = "YOUR_WIFI_PASSWORD";
 
 // ================= OLED CONFIG =================
 #define SCREEN_WIDTH 128
@@ -74,6 +79,17 @@ void moveServoSmooth(Servo &servo, int startAngle, int endAngle, int stepDelay) 
 // ================= SETUP =================
 void setup() {
   Serial.begin(115200);
+
+  WiFiManager wm;
+
+  // This creates hotspot if no WiFi saved
+  bool res = wm.autoConnect("TrashTamer_Setup");
+
+  if (!res) {
+    Serial.println("❌ Failed to connect");
+  } else {
+    Serial.println("✅ Connected to WiFi");
+  }
 
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
