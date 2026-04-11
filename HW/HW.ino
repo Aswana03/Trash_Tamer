@@ -8,6 +8,8 @@
 long duration;
 float distance;
 
+bool systemBusy = false;  // 🔥 controls scanning
+
 void setup() {
   Serial.begin(115200);
 
@@ -18,6 +20,13 @@ void setup() {
 }
 
 void loop() {
+
+  // -------- IF SYSTEM BUSY → STOP SCANNING --------
+  if (systemBusy) {
+    Serial.println("System Busy... Waiting");
+    delay(1000);
+    return;
+  }
 
   // -------- TRIGGER PULSE --------
   digitalWrite(TRIG_PIN, LOW);
@@ -41,7 +50,26 @@ void loop() {
 
   // -------- DETECTION --------
   if (distance > 0 && distance < 10) {
+
     Serial.println(">>> WASTE DETECTED <<<");
+
+    // 🔴 STOP further scanning
+    systemBusy = true;
+
+    // -------- SIMULATE FULL PROCESS --------
+    Serial.println("Processing Waste...");
+    delay(3000);   // (camera + classification)
+
+    Serial.println("Opening Lid...");
+    delay(2000);   // (servo open)
+
+    Serial.println("Closing Lid...");
+    delay(2000);   // (servo close)
+
+    Serial.println("Process Complete ✅");
+
+    // 🔴 RESUME scanning
+    systemBusy = false;
   }
 
   delay(500);
