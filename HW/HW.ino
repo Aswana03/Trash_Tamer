@@ -3,10 +3,9 @@
 #include <Adafruit_SSD1306.h>
 #include <ESP32Servo.h>
 #include <WiFiManager.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
 
-
-const char* ssid = "YOUR_WIFI_NAME";
-const char* password = "YOUR_WIFI_PASSWORD";
 
 // ================= OLED CONFIG =================
 #define SCREEN_WIDTH 128
@@ -35,12 +34,17 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 #define FOOD_SERVO_PIN 13
 #define DRY_SERVO_PIN 12
 
+String BIN_ID = "bin_001";   // 🔥 unique for each device
+
+
 Servo foodServo;
 Servo dryServo;
 
 // ================= VARIABLES =================
 long duration;
 float distance;
+
+unsigned long lastSendTime = 0;
 
 bool foodBinFull = false;
 bool dryBinFull = false;
@@ -60,6 +64,31 @@ float getDistance(int trigPin, int echoPin) {
   float dist = duration * 0.034 / 2;
 
   return dist;
+}
+
+void sendToFirebase(int bio, int nonBio) {
+
+  if (WiFi.status() == WL_CONNECTED) {
+
+    HTTPClient http;
+
+    String url = "https://firestore.googleapis.com/v1/projects/smart-waste-app-f3fe7/databases/(default)/documents/bins/" + BIN_ID;
+
+    http.begin(url);
+    http.addHeader("Content-Type", "application/json");
+
+    String payload = "{ \"fields\": { "
+                     "\"bio\": {\"integerValue\": \"" + String(bio) + "\"}, "
+                     "\"nonBio\": {\"integerValue\": \"" + String(nonBio) + "\"} "
+                     "} }";
+
+    int httpResponseCode = http.PATCH(payload);
+
+    Serial.print("Firebase Response: ");
+    Serial.println(httpResponseCode);
+
+    http.end();
+  }
 }
 
 void moveServoSmooth(Servo &servo, int startAngle, int endAngle, int stepDelay) {
@@ -174,6 +203,17 @@ void loop() {
   // 🔍 CONTINUOUS BIN MONITORING
   float foodLevel = getDistance(FOOD_BIN_TRIG, FOOD_BIN_ECHO);
   float dryLevel  = getDistance(DRY_BIN_TRIG, DRY_BIN_ECHO);
+
+  int foodPercent = map(foodLevel, 30, 5, 0, 100);
+  int dryPercent  = map(dryLevel, 30, 5, 0, 100);
+
+  foodPercent = constrain(foodPercent, 0, 100);
+  dryPercent  = constrain(dryPercent, 0, 100);
+
+  if (millis() - lastSendTime > 5000) {
+    sendToFirebase(foodPercent, dryPercent);
+    lastSendTime = millis();
+  }
 
   // Update status
   foodBinFull = (foodLevel < 5);

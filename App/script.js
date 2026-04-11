@@ -1,5 +1,5 @@
 // FIREBASE CONFIG
- const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyDaHvZTjaAZEH3HoOIB6tWKqkStSlg8oJw",
   authDomain: "smart-waste-app-f3fe7.firebaseapp.com",
   projectId: "smart-waste-app-f3fe7",
