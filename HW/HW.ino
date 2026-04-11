@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <ESP32Servo.h>
 
 // ================= OLED CONFIG =================
 #define SCREEN_WIDTH 128
@@ -18,11 +19,32 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 #define FOOD_INPUT 26
 #define DRY_INPUT 27
 
+// 🔹 SERVO PINS
+#define FOOD_SERVO_PIN 13
+#define DRY_SERVO_PIN 12
+
+Servo foodServo;
+Servo dryServo;
+
 // ================= VARIABLES =================
 long duration;
 float distance;
 
 bool systemBusy = false;
+
+void moveServoSmooth(Servo &servo, int startAngle, int endAngle, int stepDelay) {
+  if (startAngle < endAngle) {
+    for (int angle = startAngle; angle <= endAngle; angle++) {
+      servo.write(angle);
+      delay(stepDelay);
+    }
+  } else {
+    for (int angle = startAngle; angle >= endAngle; angle--) {
+      servo.write(angle);
+      delay(stepDelay);
+    }
+  }
+}
 
 // ================= SETUP =================
 void setup() {
@@ -34,6 +56,13 @@ void setup() {
   pinMode(CAM_TRIGGER, OUTPUT);
 
   pinMode(CAM_TRIGGER, OUTPUT);
+
+  foodServo.attach(FOOD_SERVO_PIN);
+  dryServo.attach(DRY_SERVO_PIN);
+
+  // Initial position (closed)
+  foodServo.write(0);
+  dryServo.write(0);
 
   // 🔥 IMPORTANT: prevent floating inputs
   pinMode(FOOD_INPUT, INPUT_PULLDOWN);
@@ -169,22 +198,43 @@ void loop() {
       display.setCursor(0, 0);
       display.println("Processing...");
       display.display();
+
+      // -------- WAIT BEFORE OPENING --------
       delay(2000);
 
-      // Opening
+      // -------- OPEN LID --------
       Serial.println("Opening Lid...");
       display.clearDisplay();
       display.setCursor(0, 0);
       display.println("Opening Lid...");
       display.display();
-      delay(2000);
 
-      // Closing
+      // 🔥 Rotate correct servo
+      if (isFood) {
+        moveServoSmooth(foodServo, 0, 180, 10);
+      }
+      else if (isDry) {
+        moveServoSmooth(dryServo, 0, 180, 10);
+      }
+
+      // Keep open for 5 seconds
+      delay(5000);
+
+      // -------- CLOSE LID --------
       Serial.println("Closing Lid...");
       display.clearDisplay();
       display.setCursor(0, 0);
       display.println("Closing Lid...");
       display.display();
+
+      // 🔥 Return to closed position
+      if (isFood) {
+        moveServoSmooth(foodServo, 180, 0, 10);
+      }
+      else if (isDry) {
+        moveServoSmooth(dryServo, 180, 0, 10);
+      }
+
       delay(2000);
 
       Serial.println("Process Complete");
