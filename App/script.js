@@ -10,233 +10,90 @@ const firebaseConfig = {
 
  // FIREBASE CONFIG
 
-
+ // 🔥 Firebase Config (your config here)
+ 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const db = firebase.firestore();
 
-// NAVIGATION
-function showScreen(id, el){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-
-  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
-  el.classList.add("active");
-
-  if(id==="mapScreen"){
-    setTimeout(()=>{
-      google.maps.event.trigger(map,"resize");
-      map.setCenter(currentLocation);
-    },300);
-  }
+// 📌 SHOW PAGES
+function showSignup() {
+  document.getElementById("loginPage").classList.add("hidden");
+  document.getElementById("signupPage").classList.remove("hidden");
 }
 
-// AUTH
-function showSignup(){ loginPage.classList.add("hidden"); signupPage.classList.remove("hidden"); }
-function showLogin(){ signupPage.classList.add("hidden"); loginPage.classList.remove("hidden"); }
-
-function signup(){
-  auth.createUserWithEmailAndPassword(signupEmail.value, signupPassword.value)
-  .then(showHome);
+function showLogin() {
+  document.getElementById("signupPage").classList.add("hidden");
+  document.getElementById("loginPage").classList.remove("hidden");
 }
 
-function login(){
-  auth.signInWithEmailAndPassword(loginEmail.value, loginPassword.value)
-  .then(showHome);
-}
+// ✅ LOGIN FUNCTION
+function login() {
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
 
-function logout(){ location.reload(); }
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      alert("✅ Login Successful");
 
-// HOME
-function showHome(){
-  loginPage.classList.add("hidden");
-  signupPage.classList.add("hidden");
-  homePage.classList.remove("hidden");
+      document.getElementById("loginPage").classList.add("hidden");
+      document.getElementById("homePage").classList.remove("hidden");
+    })
+    .catch((error) => {
 
-  listenData();
-  initChart();
-  getLocation();
-  trackTruck(); // 🚛 LIVE TRACKING
-  setInterval(syncData, 5000);
-}
-
-// FIRESTORE DATA
-function listenData(){
-  db.collection("wasteData").doc("current")
-  .onSnapshot(doc=>{
-    if(!doc.exists) return;
-
-    let d=doc.data();
-    bioValue.innerText=d.bio+"%";
-    nonBioValue.innerText=d.nonBio+"%";
- 
-    bioFill.style.boxShadow = "0 0 25px #00c853";
-    nonBioFill.style.boxShadow = "0 0 25px #ff5252";
-
-    updateChart(d.bio);
-  });
-}
-
-// 🗺️ MAP
-let map;
-let currentLocation;
-
-function getLocation(){
-  navigator.geolocation.getCurrentPosition(
-    pos=>{
-      currentLocation={
-        lat:pos.coords.latitude,
-        lng:pos.coords.longitude
-      };
-      initMap(currentLocation);
-    },
-    ()=>{
-      currentLocation={lat:11.8745,lng:75.3704};
-      initMap(currentLocation);
-    }
-  );
-}
-
-function initMap(loc){
-  map=new google.maps.Map(document.getElementById("map"),{
-    center:loc,
-    zoom:14
-  });
-
-  new google.maps.Marker({
-    position:loc,
-    map:map,
-    title:"You"
-  });
-}
-
-// 🚛 REAL TRUCK TRACKING
-let truckMarker;
-
-function trackTruck(){
-  db.collection("trucks").doc("truck1")
-  .onSnapshot(doc=>{
-    if(!doc.exists) return;
-
-    let d = doc.data();
-    let newPos = new google.maps.LatLng(d.lat, d.lng);
-
-    if(!truckMarker){
-      truckMarker = new google.maps.Marker({
-        position: newPos,
-        map: map,
-        icon: "https://maps.google.com/mapfiles/ms/icons/truck.png"
-      });
-    } else {
-      animateTruck(truckMarker, newPos);
-    }
-  });
-}
-
-/* SMOOTH MOVEMENT */
-function animateTruck(marker, newPos){
-  let steps = 30;
-  let delay = 10;
-
-  let oldPos = marker.getPosition();
-
-  let deltaLat = (newPos.lat() - oldPos.lat()) / steps;
-  let deltaLng = (newPos.lng() - oldPos.lng()) / steps;
-
-  for(let i=0;i<steps;i++){
-    setTimeout(()=>{
-      let lat = oldPos.lat() + deltaLat * i;
-      let lng = oldPos.lng() + deltaLng * i;
-      marker.setPosition({lat,lng});
-    }, i * delay);
-  }
-}
-
-// 📊 CHART
-let chart;
-
- function initChart(){
-  chart = new Chart(document.getElementById("chart"), {
-    type: "line",
-    data: {
-      labels: [],
-      datasets: [{
-        label: "Bio Waste %",
-        data: [],
-        borderWidth: 3,
-        tension: 0.4
-      }]
-    },
-    options: {
-      plugins: {
-        legend: { display: true }
-      },
-      scales: {
-        y: {
-          min: 0,
-          max: 100
-        }
+      // ❌ ERROR HANDLING
+      if (error.code === "auth/user-not-found") {
+        alert("❌ Account not found! Please sign up first.");
+        showSignup(); // 👉 move to signup page
       }
-    }
+      else if (error.code === "auth/wrong-password") {
+        alert("❌ Wrong password!");
+      }
+      else if (error.code === "auth/invalid-email") {
+        alert("❌ Invalid email format!");
+      }
+      else {
+        alert("❌ Error: " + error.message);
+      }
+
+    });
+}
+
+// ✅ SIGNUP FUNCTION
+function signup() {
+  const email = document.getElementById("signupEmail").value;
+  const password = document.getElementById("signupPassword").value;
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(() => {
+      alert("🎉 Account Created Successfully!");
+
+      // 👉 Directly go to app after signup
+      document.getElementById("signupPage").classList.add("hidden");
+      document.getElementById("homePage").classList.remove("hidden");
+    })
+    .catch((error) => {
+      alert("❌ " + error.message);
+    });
+}
+
+// 🚪 LOGOUT
+function logout() {
+  auth.signOut().then(() => {
+    alert("👋 Logged out!");
+
+    document.getElementById("homePage").classList.add("hidden");
+    document.getElementById("loginPage").classList.remove("hidden");
   });
 }
-function updateChart(value){
-  let time = new Date().toLocaleTimeString();
 
-  chart.data.labels.push(time);
-  chart.data.datasets[0].data.push(value);
-
-  if(chart.data.labels.length > 8){
-    chart.data.labels.shift();
-    chart.data.datasets[0].data.shift();
+// 🔄 KEEP USER LOGGED IN (IMPORTANT)
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("signupPage").classList.add("hidden");
+    document.getElementById("homePage").classList.remove("hidden");
+  } else {
+    document.getElementById("homePage").classList.add("hidden");
+    document.getElementById("loginPage").classList.remove("hidden");
   }
-
-  chart.update();
-
-  updateInsights(value); // 🔥 ADD THIS
-}
-
-
- 
-function syncData() {
-
-  let bio = Math.floor(Math.random() * 100);
-  let nonBio = Math.floor(Math.random() * 100);
-
-  // UPDATE HEIGHT
-  bioFill.style.height = bio + "%";
-  nonBioFill.style.height = nonBio + "%";
-
-  bioValue.innerText = bio + "%";
-  nonBioValue.innerText = nonBio + "%";
-
-  // 🌊 ADD TILT EFFECT
-  bioFill.classList.add("tilt");
-  nonBioFill.classList.add("tilt");
-
-  // REMOVE AFTER ANIMATION
-  setTimeout(() => {
-    bioFill.classList.remove("tilt");
-    nonBioFill.classList.remove("tilt");
-  }, 600);
-}
-function updateInsights(value){
-  let text = "";
-
-  if(value < 50){
-    text = "🟢 Bin level is safe";
-  }
-  else if(value < 80){
-    text = "🟡 Bin is filling, monitor closely";
-  }
-  else{
-    text = "🔴 Bin almost full! Collection needed";
-  }
-
-  // SIMPLE PREDICTION
-  let predictedTime = Math.max(0, (100 - value) * 2);
-
-  text += "<br>⏳ Estimated full in: " + predictedTime + " mins";
-
-  document.getElementById("insightText").innerHTML = text;
-}
+});
