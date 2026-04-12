@@ -16,6 +16,7 @@
 
 <body>
 
+
 <!-- ================= LOGIN ================= -->
 <div id="loginPage" class="card center">
 
@@ -29,6 +30,7 @@
   <div class="input-group">
     <label>🔒 Password</label>
     <input type="password" id="loginPassword" placeholder="Enter your password">
+    <p id="loginError" class="error-msg"></p>
   </div>
 
   <button onclick="login()">🚀 Login</button>
@@ -42,46 +44,50 @@
   <h2>Sign Up</h2>
   <input id="signupEmail" placeholder="Email">
   <input id="signupPassword" type="password" placeholder="Password">
+  <p id="signupError" class="error-msg"></p>
   <button onclick="signup()">Sign Up</button>
   <p onclick="showLogin()">Back</p>
 </div>
 
-<!-- ================= MAIN APP ================= -->
 <div id="homePage" class="hidden app">
 
   <!-- HEADER -->
-  <div class="header">SMART WASTE SEGREGATION</div>
+  <div class="header">TRASH TAMER</div>
 
-  <!-- ================= SCREEN 1: SELECT BIN ================= -->
+  <!-- ✅ ADD TOAST HERE -->
+  <div id="toast" class="toast"></div>
+
+  <!-- SELECT BIN -->
   <div id="selectBinScreen" class="screen active">
-
     <div class="main-card">
 
-      <h2>Select Your Dustbin</h2>
-
-      <div id="binList"></div>
-
-      <button onclick="addBin()">➕ Add Dustbin</button>
-
+    <div class="top-actions">
+      <button onclick="logout()">Exit</button>
     </div>
-
+      <h2>Select Your Dustbin</h2>
+      <div id="binList"></div>
+      <button onclick="addBin()">➕ Add Dustbin</button>
+    </div>
   </div>
 
-  <!-- ================= SCREEN 2: HOME ================= -->
+  <!-- HOME SCREEN -->
   <div id="homeScreen" class="screen">
-
     <div class="main-card">
 
-      <!-- STATUS -->
       <div class="status">
-        <span>🟢 LIVE</span>
-        <button onclick="logout()">Exit</button>
+        <span id="statusText" class="status-indicator offline">
+        <span class="dot"></span>
+        OFFLINE
+        </span>
+
+        <div class="top-actions">
+          <button onclick="goBack()">⬅ Back</button>
+          <button onclick="logout()">Exit</button>
+        </div>
       </div>
 
-      <!-- BINS DISPLAY -->
       <div class="bins">
 
-        <!-- BIO -->
         <div class="bin">
           <div class="bin-box">
             <div id="bioFill" class="fill green">
@@ -92,7 +98,6 @@
           <h2 id="bioValue">0%</h2>
         </div>
 
-        <!-- NON BIO -->
         <div class="bin">
           <div class="bin-box">
             <div id="nonBioFill" class="fill red">
@@ -105,20 +110,51 @@
 
       </div>
 
-      <!-- SYNC BUTTON -->
       <div class="sync-container">
         <button class="sync-btn-small" onclick="syncData()">🔄 Sync</button>
       </div>
 
     </div>
-
   </div>
 
-  <!-- ================= NAV ================= -->
-  <div class="bottom-nav">
-    <div class="nav-item active">
+  <!-- PROFILE SCREEN -->
+  <div id="profileScreen" class="screen">
+    <div class="main-card">
+      <h2>👤 Profile</h2>
+      <p><strong>Email:</strong></p>
+      <p id="profileEmail"></p>
+      <button onclick="openResetScreen()">🔑 Reset Password</button>
+      <button onclick="showScreen('homeScreen')">⬅ Back</button>
+    </div>
+  </div>
+
+  <!-- ================= RESET PASSWORD SCREEN ================= -->
+  <div id="resetScreen" class="screen">
+
+    <div class="main-card">
+
+      <h2>🔐 Reset Password</h2>
+
+      <input type="password" id="newPassword" placeholder="Enter new password">
+
+      <button onclick="saveNewPassword()">💾 Save</button>
+
+      <button onclick="showScreen('profileScreen')">⬅ Back</button>
+
+    </div>
+
+</div>
+
+  <!-- NAV -->
+  <div id="bottomNav" class="bottom-nav hidden">
+    <div class="nav-item" onclick="showScreen('homeScreen')">
       <span class="material-icons">home</span>
       <small>Home</small>
+    </div>
+
+    <div class="nav-item" onclick="openProfile()">
+      <span class="material-icons">person</span>
+      <small>Profile</small>
     </div>
   </div>
 
