@@ -111,8 +111,66 @@ void setup() {
 
   WiFiManager wm;
 
+  wm.setCustomHeadElement(R"rawliteral(
+  <style>
+
+  /* Background */
+  body {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
+    text-align: center;
+  }
+
+  /* Card container */
+  .wrap {
+    background: #ffffff;
+    color: black;
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 40px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  }
+
+  /* Header */
+  h1 {
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    color: white;
+    padding: 12px;
+    border-radius: 15px;
+  }
+
+  /* Buttons */
+  button {
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    width: 80%;
+    margin: 10px;
+  }
+
+  /* Inputs */
+  input {
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    width: 80%;
+  }
+
+  /* Status box */
+  .msg {
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  </style>
+  )rawliteral");
+
   // This creates hotspot if no WiFi saved
-  bool res = wm.autoConnect("TrashTamer_Setup");
+  bool res = wm.autoConnect("TrashTamer_001");
 
   if (!res) {
     Serial.println("❌ Failed to connect");

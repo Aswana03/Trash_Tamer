@@ -13,7 +13,9 @@ const firebaseConfig = {
  // 🔥 Firebase Config (your config here)
  
 firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
+const db = firebase.firestore(); 
 
 // 📌 SHOW PAGES
 function showSignup() {
@@ -37,6 +39,8 @@ function login() {
 
       document.getElementById("loginPage").classList.add("hidden");
       document.getElementById("homePage").classList.remove("hidden");
+
+      loadBins(); // 👉 Load bins after login
     })
     .catch((error) => {
 
@@ -92,8 +96,66 @@ auth.onAuthStateChanged((user) => {
     document.getElementById("loginPage").classList.add("hidden");
     document.getElementById("signupPage").classList.add("hidden");
     document.getElementById("homePage").classList.remove("hidden");
+
+    loadBins();
   } else {
     document.getElementById("homePage").classList.add("hidden");
     document.getElementById("loginPage").classList.remove("hidden");
   }
 });
+
+let selectedBin = "";
+
+// 🔥 Load bins from Firebase
+function loadBins() {
+  db.collection("bins").get().then((snapshot) => {
+
+    const binList = document.getElementById("binList");
+    binList.innerHTML = "";
+
+    snapshot.forEach((doc) => {
+      const binId = doc.id;
+
+      // Create UI card
+      const div = document.createElement("div");
+      div.className = "bin-card";
+      div.innerText = binId;
+
+      // Click to select bin
+      div.onclick = () => selectBin(binId);
+
+      binList.appendChild(div);
+    });
+
+  });
+}
+
+function selectBin(binId) {
+  selectedBin = binId;
+
+  document.getElementById("selectBinScreen").classList.remove("active");
+  document.getElementById("homeScreen").classList.add("active");
+
+  loadBinData(); // load that bin data
+}
+
+function loadBinData() {
+
+  db.collection("bins").doc(selectedBin)
+    .onSnapshot((doc) => {
+
+      if (doc.exists) {
+        const data = doc.data();
+
+        let bio = data.bio || 0;
+        let nonBio = data.nonBio || 0;
+
+        // Update UI
+        document.getElementById("bioValue").innerText = bio + "%";
+        document.getElementById("nonBioValue").innerText = nonBio + "%";
+
+        document.getElementById("bioFill").style.height = bio + "%";
+        document.getElementById("nonBioFill").style.height = nonBio + "%";
+      }
+    });
+}

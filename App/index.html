@@ -12,20 +12,12 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-  <!-- Chart -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- Google Maps -->
-      <script async defer 
-src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcf39RZ7YxVFR8FEpRVfA6zRqySn3EVdc&callback=getLocation">
-</script>
-
+</head>
 
 <body>
 
-<!-- LOGIN -->
- <div id="loginPage" class="card center">
+<!-- ================= LOGIN ================= -->
+<div id="loginPage" class="card center">
 
   <h2>🌿 EcoFlow AI</h2>
 
@@ -45,7 +37,7 @@ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcf39RZ7YxVFR8FEpRVfA6zRq
 
 </div>
 
-<!-- SIGNUP -->
+<!-- ================= SIGNUP ================= -->
 <div id="signupPage" class="card center hidden">
   <h2>Sign Up</h2>
   <input id="signupEmail" placeholder="Email">
@@ -54,89 +46,85 @@ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcf39RZ7YxVFR8FEpRVfA6zRq
   <p onclick="showLogin()">Back</p>
 </div>
 
-<!-- APP -->
+<!-- ================= MAIN APP ================= -->
 <div id="homePage" class="hidden app">
 
+  <!-- HEADER -->
   <div class="header">SMART WASTE SEGREGATION</div>
 
-  <!-- HOME -->
-   
-   <!-- HOME -->
-<div id="homeScreen" class="screen active">
-  <div class="main-card">
+  <!-- ================= SCREEN 1: SELECT BIN ================= -->
+  <div id="selectBinScreen" class="screen active">
 
-    <div class="status">
-      <span>🟢 LIVE</span>
-      <button onclick="logout()">Exit</button>
-    </div>
-
-    <!-- BINS -->
-    <div class="bins">
-
-      <div class="bin">
-        <div class="bin-box">
-           <div id="bioFill" class="fill green">
-  <div class="wave"></div>
-</div>
-        </div>
-        <h3>BIO</h3>
-        <h2 id="bioValue">0%</h2>
-      </div>
-
-      <div class="bin">
-        <div class="bin-box">
-           <div id="nonBioFill" class="fill red">
-  <div class="wave"></div>
-</div>
-        </div>
-        <h3>NON BIO</h3>
-        <h2 id="nonBioValue">0%</h2>
-      </div>
-
-    </div>
-
-    <!-- 🔄 SYNC BUTTON AT BOTTOM -->
-    <div class="sync-container">
-      <button class="sync-btn-small" onclick="syncData()">🔄 Sync</button>
-    </div>
-
-  </div>
-</div>
-
-  <!-- MAP -->
-  <div id="mapScreen" class="screen">
     <div class="main-card">
-      <div id="map"></div>
+
+      <h2>Select Your Dustbin</h2>
+
+      <div id="binList"></div>
+
+      <button onclick="addBin()">➕ Add Dustbin</button>
+
     </div>
+
   </div>
 
-  <!-- ANALYTICS -->
-   <div id="analyticsScreen" class="screen">
-  <div class="main-card">
-    <canvas id="chart"></canvas>
+  <!-- ================= SCREEN 2: HOME ================= -->
+  <div id="homeScreen" class="screen">
 
-    <div id="insightBox">
-      <p id="insightText">📊 Waiting for data...</p>
+    <div class="main-card">
+
+      <!-- STATUS -->
+      <div class="status">
+        <span>🟢 LIVE</span>
+        <button onclick="logout()">Exit</button>
+      </div>
+
+      <!-- BINS DISPLAY -->
+      <div class="bins">
+
+        <!-- BIO -->
+        <div class="bin">
+          <div class="bin-box">
+            <div id="bioFill" class="fill green">
+              <div class="wave"></div>
+            </div>
+          </div>
+          <h3>BIO</h3>
+          <h2 id="bioValue">0%</h2>
+        </div>
+
+        <!-- NON BIO -->
+        <div class="bin">
+          <div class="bin-box">
+            <div id="nonBioFill" class="fill red">
+              <div class="wave"></div>
+            </div>
+          </div>
+          <h3>NON BIO</h3>
+          <h2 id="nonBioValue">0%</h2>
+        </div>
+
+      </div>
+
+      <!-- SYNC BUTTON -->
+      <div class="sync-container">
+        <button class="sync-btn-small" onclick="syncData()">🔄 Sync</button>
+      </div>
+
     </div>
-  </div>
-</div>
-   
 
-  <!-- NAV -->
+  </div>
+
+  <!-- ================= NAV ================= -->
   <div class="bottom-nav">
-    <div class="nav-item active" onclick="showScreen('homeScreen', this)">
-      <span class="material-icons">home</span><small>Home</small>
-    </div>
-    <div class="nav-item" onclick="showScreen('mapScreen', this)">
-      <span class="material-icons">map</span><small>Map</small>
-    </div>
-    <div class="nav-item" onclick="showScreen('analyticsScreen', this)">
-      <span class="material-icons">analytics</span><small>Analytics</small>
+    <div class="nav-item active">
+      <span class="material-icons">home</span>
+      <small>Home</small>
     </div>
   </div>
 
 </div>
 
+<!-- ================= SCRIPT ================= -->
 <script src="script.js"></script>
 
 </body>
