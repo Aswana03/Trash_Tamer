@@ -21,37 +21,40 @@ let currentUser = "user_test";
 
 // 📌 SHOW PAGES
 function signup() {
+  const username = document.getElementById("signupUsername").value;
   const email = document.getElementById("signupEmail").value;
   const password = document.getElementById("signupPassword").value;
 
   const errorBox = document.getElementById("signupError");
 
   auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+
+      const user = userCredential.user;
+
+      return db.collection("users").doc(user.uid).set({
+        username: username,
+        email: email
+      });
+
+    })
     .then(() => {
 
-      errorBox.innerText = "";
+      // 🔥 IMPORTANT FIX
+      return auth.signOut();
+
+    })
+    .then(() => {
 
       showToast("Registered successfully 🎉 Please login");
 
       document.getElementById("signupPage").classList.add("hidden");
+      document.getElementById("homePage").classList.add("hidden");
       document.getElementById("loginPage").classList.remove("hidden");
 
     })
     .catch((error) => {
-
-      if (error.code === "auth/email-already-in-use") {
-        errorBox.innerText = "User already exists";
-      }
-      else if (error.code === "auth/weak-password") {
-        errorBox.innerText = "Password must be at least 6 characters";
-      }
-      else if (error.code === "auth/invalid-email") {
-        errorBox.innerText = "Invalid email format";
-      }
-      else {
-        errorBox.innerText = error.message;
-      }
-
+      errorBox.innerText = error.message;
     });
 }
 
@@ -78,10 +81,14 @@ function login() {
     .then(() => {
       document.getElementById("loginError").innerText = "";
       showToast("Login successful ✅");
+      loadUserProfile();
 
       document.getElementById("loginPage").classList.add("hidden");
       document.getElementById("homePage").classList.remove("hidden");
       document.getElementById("bottomNav").classList.remove("hidden");
+
+      document.getElementById("signupPage").classList.add("hidden");
+
 
       loadBins(); // 👉 Load bins after login
     })
@@ -139,48 +146,46 @@ let selectedBin = "";
 
 // 🔥 Load bins from Firebase
 function loadBins() {
+  const user = firebase.auth().currentUser;
+  const binList = document.getElementById("binList");
+
+  if (!user) return;
 
   db.collection("users")
-    .doc(currentUser)
+    .doc(user.uid)
     .collection("bins")
-    .get()
-    .then((snapshot) => {
+    .onSnapshot((snapshot) => {
 
-      const binList = document.getElementById("binList");
       binList.innerHTML = "";
 
       if (snapshot.empty) {
-        binList.innerHTML = "<p>No bins found. Add one!</p>";
+        binList.innerHTML = "<p>No bins added yet</p>";
         return;
       }
 
       snapshot.forEach((doc) => {
+        const binId = doc.id;
 
-      const binId = doc.id;
+        const binElement = document.createElement("div");
+        binElement.className = "bin-item";
 
-      const div = document.createElement("div");
-      div.className = "bin-card";
+        binElement.innerHTML = `
+          <span class="bin-name">${binId}</span>
+          <span class="delete-icon">🗑️</span>
+        `;
 
-      // 🧱 Bin name
-      const name = document.createElement("span");
-      name.innerText = binId;
-      name.onclick = () => selectBin(binId);
+        // click to open
+        binElement.onclick = () => selectBin(binId);
 
-      // 🗑️ Delete icon
-      const del = document.createElement("span");
-      del.innerHTML = "🗑️";
-      del.className = "delete-icon";
+        // delete click
+        const deleteBtn = binElement.querySelector(".delete-icon");
+        deleteBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteBin(binId);
+        };
 
-      del.onclick = (e) => {
-        e.stopPropagation(); // ❗ prevents opening bin
-        deleteBin(binId);
-      };
-
-      div.appendChild(name);
-      div.appendChild(del);
-
-      binList.appendChild(div);
-    });
+        binList.appendChild(binElement);
+      });
 
     });
 }
@@ -195,47 +200,21 @@ function selectBin(binId) {
 }
 
 function loadBinData() {
+  const user = firebase.auth().currentUser;
 
   db.collection("users")
-    .doc(currentUser)
+    .doc(user.uid)
     .collection("bins")
     .doc(selectedBin)
     .onSnapshot((doc) => {
 
-      if (!doc.exists) return;
-
       const data = doc.data();
 
-      let bio = data.bio || 0;
-      let nonBio = data.nonBio || 0;
+      document.getElementById("bioValue").innerText = data.bio + "%";
+      document.getElementById("nonBioValue").innerText = data.nonBio + "%";
 
-      document.getElementById("bioValue").innerText = bio + "%";
-      document.getElementById("nonBioValue").innerText = nonBio + "%";
-
-      document.getElementById("bioFill").style.height = bio + "%";
-      document.getElementById("nonBioFill").style.height = nonBio + "%";
-
-      // ✅ STATUS LOGIC
-      const statusText = document.getElementById("statusText");
-
-      let lastTime = 0;
-
-      if (data.lastUpdated) {
-        lastTime = data.lastUpdated.toMillis();
-      }
-
-      if (lastTime && (Date.now() - lastTime < 10000)) {
-        statusText.innerHTML = '<span class="dot"></span> LIVE';
-        statusText.classList.remove("offline");
-        statusText.classList.add("live");
-      } else {
-        statusText.innerHTML = '<span class="dot"></span> OFFLINE';
-        statusText.classList.remove("live");
-        statusText.classList.add("offline");
-      }
-
-    }); // ✅ THIS WAS MISSING
-
+      updateStatus(data.lastUpdated);
+    });
 }
 
 
@@ -256,29 +235,23 @@ function closePopup() {
 }
 
 function createBin() {
-  const binId = document.getElementById("binInput").value.trim();
+  const binId = document.getElementById("binInput").value;
+  const user = firebase.auth().currentUser;
 
-  if (!binId) {
-    showToast("Enter valid bin ID", "error");
-    return;
-  }
-
-  const userId = auth.currentUser.uid;
+  if (!binId) return showToast("Enter bin name");
 
   db.collection("users")
-    .doc(userId)
+    .doc(user.uid)
     .collection("bins")
     .doc(binId)
     .set({
       bio: 0,
       nonBio: 0,
       lastUpdated: Date.now()
-    })
-    .then(() => {
-      showToast("Bin added successfully", "success");
-      closePopup();
-      loadBins();
     });
+
+  showToast("Bin added ✅");
+  closePopup();
 }
 
 function showProfile() {
@@ -296,12 +269,18 @@ function goBack() {
 
 
 function openProfile() {
-  showScreen("profileScreen");
+  const user = firebase.auth().currentUser;
 
-  const user = auth.currentUser;
-  if (user) {
-    document.getElementById("profileEmail").innerText = user.email;
-  }
+  db.collection("users").doc(user.uid).get()
+    .then(doc => {
+      if (doc.exists && doc.data().username) {
+        profileUsername.innerText = doc.data().username;
+      } else {
+        profileUsername.innerText = user.email; // fallback
+      }
+    });
+
+  showScreen("profileScreen");
 }
 
 function setActive(element) {
@@ -375,25 +354,6 @@ function saveNewPassword() {
   }
 }
 
-function deleteBin(binId) {
-
-  const userId = auth.currentUser.uid;
-
-  if (!confirm("Delete this bin?")) return;
-
-  db.collection("users")
-    .doc(userId)
-    .collection("bins")
-    .doc(binId)
-    .delete()
-    .then(() => {
-      showToast("Bin deleted 🗑️", "success");
-      loadBins();
-    })
-    .catch(() => {
-      showToast("Error deleting bin ❌", "error");
-    });
-}
 
 let binToDelete = "";
 
@@ -431,5 +391,83 @@ function resetPasswordEmail() {
   firebase.auth().sendPasswordResetEmail(email)
     .then(() => {
       showToast("Reset link sent to your email 📩");
+    });
+}
+
+function loadUserProfile() {
+  const user = firebase.auth().currentUser;
+
+  db.collection("users").doc(user.uid).get()
+    .then(doc => {
+      if (doc.exists) {
+        document.getElementById("profileUsername").innerText = doc.data().username;
+      }
+    });
+}
+
+function confirmDeleteAccount() {
+  document.getElementById("deleteAccountPopup").classList.remove("hidden");
+}
+
+function deleteAccount() {
+
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const uid = user.uid;
+
+  // 🔥 Delete Firestore
+  db.collection("users").doc(uid).delete()
+    .then(() => {
+
+      return user.delete();
+
+    })
+    .then(() => {
+
+      showToast("Account deleted 🗑️");
+
+      closeDeleteAccount();
+
+      // 🔥 Proper redirect
+      document.getElementById("homePage").classList.add("hidden");
+      document.getElementById("loginPage").classList.remove("hidden");
+      document.getElementById("bottomNav").classList.add("hidden");
+
+    })
+    .catch((error) => {
+
+      if (error.code === "auth/requires-recent-login") {
+
+        closeDeleteAccount();
+        showToast("⚠️ Please login again");
+
+        logout(); // 🔥 clean redirect
+
+      } else {
+        console.error(error);
+      }
+
+    });
+}
+
+function closeDeleteAccount() {
+  document.getElementById("deleteAccountPopup").classList.add("hidden");
+}
+
+function forgotPassword() {
+  const email = document.getElementById("loginEmail").value;
+
+  if (!email) {
+    showToast("Enter your email first ⚠️");
+    return;
+  }
+
+  auth.sendPasswordResetEmail(email)
+    .then(() => {
+      showToast("Reset link sent to your email 📩");
+    })
+    .catch((error) => {
+      showToast("Error: " + error.message);
     });
 }

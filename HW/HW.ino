@@ -72,7 +72,10 @@ void sendToFirebase(int bio, int nonBio) {
 
     HTTPClient http;
 
-    String url = "https://firestore.googleapis.com/v1/projects/smart-waste-app-f3fe7/databases/(default)/documents/bins/" + BIN_ID;
+    String USER_ID = "PASTE_YOUR_FIREBASE_UID_HERE";
+
+    String url = "https://firestore.googleapis.com/v1/projects/smart-waste-app-f3fe7/databases/(default)/documents/users/" 
+                + USER_ID + "/bins/" + BIN_ID;
 
     http.begin(url);
     http.addHeader("Content-Type", "application/json");

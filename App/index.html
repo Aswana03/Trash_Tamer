@@ -33,6 +33,10 @@
     <p id="loginError" class="error-msg"></p>
   </div>
 
+  <p onclick="forgotPassword()" style="cursor:pointer; color:green;">
+  Forgot Password?
+  </p>
+
   <button onclick="login()">🚀 Login</button>
 
   <p onclick="showSignup()">✨ Create Account</p>
@@ -42,6 +46,7 @@
 <!-- ================= SIGNUP ================= -->
 <div id="signupPage" class="card center hidden">
   <h2>Sign Up</h2>
+  <input id="signupUsername" placeholder="Username">
   <input id="signupEmail" placeholder="Email">
   <input id="signupPassword" type="password" placeholder="Password">
   <p id="signupError" class="error-msg"></p>
@@ -122,8 +127,11 @@
     <div class="main-card">
       <h2>👤 Profile</h2>
       <p><strong>Email:</strong></p>
-      <p id="profileEmail"></p>
+      <p id="profileUsername"></p>
       <button onclick="openResetScreen()">🔑 Reset Password</button>
+      <button onclick="confirmDeleteAccount()" class="danger-btn">
+        🗑️ Delete Account
+      </button>
       <button onclick="showScreen('homeScreen')">⬅ Back</button>
     </div>
   </div>
@@ -194,7 +202,19 @@
 
   </div>
 
-</div>
+  </div>
+
+  <div id="deleteAccountPopup" class="popup hidden">
+    <div class="popup-card">
+      <h3>⚠️ Delete Account</h3>
+      <p>This action cannot be undone</p>
+
+      <div class="popup-actions">
+        <button onclick="deleteAccount()">Delete</button>
+        <button onclick="closeDeleteAccount()">Cancel</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>

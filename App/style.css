@@ -129,6 +129,43 @@ p {
   display: block;
 }
 
+.bin-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.bin-name {
+  font-weight: 600;
+}
+
+.danger-btn {
+  background: #ff4d4d;
+  color: white;
+}
+
+.danger-btn:hover {
+  background: #e60000;
+}
+
+.delete-icon {
+  font-size: 18px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: 0.3s;
+}
+
+.delete-icon:hover {
+  color: red;
+  opacity: 1;
+  transform: scale(1.2);
+}
+
 /* ===== BIN LIST ===== */
 #binList {
   margin: 20px 0;
