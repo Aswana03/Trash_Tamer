@@ -35,6 +35,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 #define DRY_SERVO_PIN 12
 
 String BIN_ID = "bin_001";   // 🔥 unique for each device
+String USER_ID = "";
 
 
 Servo foodServo;
@@ -72,20 +73,23 @@ void sendToFirebase(int bio, int nonBio) {
 
     HTTPClient http;
 
-    String USER_ID = "PASTE_YOUR_FIREBASE_UID_HERE";
-
     String url = "https://firestore.googleapis.com/v1/projects/smart-waste-app-f3fe7/databases/(default)/documents/users/" 
                 + USER_ID + "/bins/" + BIN_ID;
 
     http.begin(url);
     http.addHeader("Content-Type", "application/json");
+    http.addHeader("X-HTTP-Method-Override", "PATCH");
 
     String payload = "{ \"fields\": { "
-                     "\"bio\": {\"integerValue\": \"" + String(bio) + "\"}, "
-                     "\"nonBio\": {\"integerValue\": \"" + String(nonBio) + "\"} "
-                     "} }";
+                 "\"bio\": {\"integerValue\": " + String(bio) + "}, "
+                 "\"nonBio\": {\"integerValue\": " + String(nonBio) + "}, "
+                 "\"lastUpdated\": {\"integerValue\": " + String(millis()) + "} "
+                 "} }";
 
-    int httpResponseCode = http.PATCH(payload);
+    Serial.println("URL: " + url);
+    Serial.println("Payload: " + payload);        
+
+    int httpResponseCode = http.sendRequest("PATCH", payload);
 
     Serial.print("Firebase Response: ");
     Serial.println(httpResponseCode);
@@ -113,6 +117,9 @@ void setup() {
   Serial.begin(115200);
 
   WiFiManager wm;
+
+  WiFiManagerParameter custom_email("email", "Enter Email", "", 40);
+  wm.addParameter(&custom_email);
 
   wm.setCustomHeadElement(R"rawliteral(
   <style>
@@ -173,7 +180,14 @@ void setup() {
   )rawliteral");
 
   // This creates hotspot if no WiFi saved
+  wm.resetSettings();   // 🔥 ADD THIS LINE
+
   bool res = wm.autoConnect("TrashTamer_001");
+
+  USER_ID = custom_email.getValue();
+  USER_ID.replace(".", "_");
+
+  Serial.println("User ID: " + USER_ID);
 
   if (!res) {
     Serial.println("❌ Failed to connect");
@@ -271,14 +285,14 @@ void loop() {
   foodPercent = constrain(foodPercent, 0, 100);
   dryPercent  = constrain(dryPercent, 0, 100);
 
-  if (millis() - lastSendTime > 5000) {
+  if (millis() - lastSendTime > 1000) {
     sendToFirebase(foodPercent, dryPercent);
     lastSendTime = millis();
   }
 
   // Update status
-  foodBinFull = (foodLevel < 5);
-  dryBinFull  = (dryLevel < 5);
+  foodBinFull = (foodPercent >= 90);
+  dryBinFull  = (dryPercent >= 90);
 
   // -------- DETECTION (DOUBLE CHECK) --------
   if (distance > 0 && distance < 10) {

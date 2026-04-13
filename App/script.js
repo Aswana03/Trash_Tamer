@@ -17,6 +17,12 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore(); 
 
+let bioAlertShown = false;
+let nonBioAlertShown = false;
+
+let bioNormalShown = false;
+let nonBioNormalShown = false;
+
 let currentUser = "user_test";
 
 // 📌 SHOW PAGES
@@ -32,7 +38,7 @@ function signup() {
 
       const user = userCredential.user;
 
-      return db.collection("users").doc(user.uid).set({
+      return db.collection("users").doc(user.email.replace(/\./g, "_")).set({
         username: username,
         email: email
       });
@@ -128,7 +134,7 @@ function logout() {
 // 🔄 KEEP USER LOGGED IN (IMPORTANT)
 auth.onAuthStateChanged((user) => {
   if (user) {
-    currentUser = user.uid;
+    currentUser = user.email.replace(/\./g, "_");
 
     document.getElementById("loginPage").classList.add("hidden");
     document.getElementById("homePage").classList.remove("hidden");
@@ -152,7 +158,7 @@ function loadBins() {
   if (!user) return;
 
   db.collection("users")
-    .doc(user.uid)
+    .doc(user.email.replace(/\./g, "_"))
     .collection("bins")
     .onSnapshot((snapshot) => {
 
@@ -203,15 +209,14 @@ function loadBinData() {
   const user = firebase.auth().currentUser;
 
   db.collection("users")
-    .doc(user.uid)
+    .doc(user.email.replace(/\./g, "_"))
     .collection("bins")
     .doc(selectedBin)
     .onSnapshot((doc) => {
 
       const data = doc.data();
 
-      document.getElementById("bioValue").innerText = data.bio + "%";
-      document.getElementById("nonBioValue").innerText = data.nonBio + "%";
+      updateBinsUI(data.bio, data.nonBio);
 
       updateStatus(data.lastUpdated);
     });
@@ -241,7 +246,7 @@ function createBin() {
   if (!binId) return showToast("Enter bin name");
 
   db.collection("users")
-    .doc(user.uid)
+    .doc(user.email.replace(/\./g, "_"))
     .collection("bins")
     .doc(binId)
     .set({
@@ -271,7 +276,7 @@ function goBack() {
 function openProfile() {
   const user = firebase.auth().currentUser;
 
-  db.collection("users").doc(user.uid).get()
+  db.collection("users").doc(user.email.replace(/\./g, "_")).get()
     .then(doc => {
       if (doc.exists && doc.data().username) {
         profileUsername.innerText = doc.data().username;
@@ -368,7 +373,7 @@ function closeDeletePopup() {
 
 function confirmDelete() {
 
-  const userId = auth.currentUser.uid;
+  const userId = auth.currentUser.email.replace(/\./g, "_");
 
   db.collection("users")
     .doc(userId)
@@ -397,7 +402,7 @@ function resetPasswordEmail() {
 function loadUserProfile() {
   const user = firebase.auth().currentUser;
 
-  db.collection("users").doc(user.uid).get()
+  db.collection("users").doc(user.email.replace(/\./g, "_")).get()
     .then(doc => {
       if (doc.exists) {
         document.getElementById("profileUsername").innerText = doc.data().username;
@@ -414,7 +419,7 @@ function deleteAccount() {
   const user = auth.currentUser;
   if (!user) return;
 
-  const uid = user.uid;
+  const uid = user.email.replace(/\./g, "_");
 
   // 🔥 Delete Firestore
   db.collection("users").doc(uid).delete()
@@ -470,4 +475,55 @@ function forgotPassword() {
     .catch((error) => {
       showToast("Error: " + error.message);
     });
+}
+
+function updateStatus(lastUpdated) {
+  const statusEl = document.getElementById("statusText");
+
+  if (!lastUpdated) {
+    statusEl.innerHTML = '<span class="dot"></span> OFFLINE';
+    statusEl.classList.remove("online");
+    statusEl.classList.add("offline");
+    return;
+  }
+
+  // 🔥 Since ESP uses millis OR timestamp, just mark as ONLINE
+  statusEl.innerHTML = '<span class="dot"></span> ONLINE';
+  statusEl.classList.remove("offline");
+  statusEl.classList.add("online");
+}
+
+function updateBinsUI(bio, nonBio) {
+
+  document.getElementById("bioValue").innerText = bio + "%";
+  document.getElementById("nonBioValue").innerText = nonBio + "%";
+
+  document.getElementById("bioFill").style.height = bio + "%";
+  document.getElementById("nonBioFill").style.height = nonBio + "%";
+
+  // ================= BIO =================
+  if (bio >= 90 && !bioAlertShown) {
+    showToast("⚠️ Food bin almost full!", "error");
+    bioAlertShown = true;
+    bioNormalShown = false;
+  }
+
+  if (bio < 90 && !bioNormalShown) {
+    showToast("✅ Food bin normal", "success");
+    bioNormalShown = true;
+    bioAlertShown = false;
+  }
+
+  // ================= NON BIO =================
+  if (nonBio >= 90 && !nonBioAlertShown) {
+    showToast("⚠️ Dry bin almost full!", "error");
+    nonBioAlertShown = true;
+    nonBioNormalShown = false;
+  }
+
+  if (nonBio < 90 && !nonBioNormalShown) {
+    showToast("✅ Dry bin normal", "success");
+    nonBioNormalShown = true;
+    nonBioAlertShown = false;
+  }
 }
