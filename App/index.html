@@ -163,5 +163,38 @@
 <!-- ================= SCRIPT ================= -->
 <script src="script.js"></script>
 
+<div id="binPopup" class="popup hidden">
+
+  <div class="popup-card">
+
+    <h3>🗑️ Add New Bin</h3>
+
+    <input type="text" id="binInput" placeholder="Enter bin ID (e.g. bin_002)">
+
+    <div class="popup-actions">
+      <button onclick="createBin()">Add</button>
+      <button onclick="closePopup()">Cancel</button>
+    </div>
+
+  </div>
+
+</div>
+
+<div id="deletePopup" class="popup hidden">
+
+  <div class="popup-card">
+
+    <h3>⚠️ Delete Bin</h3>
+    <p>Are you sure you want to delete this bin?</p>
+
+    <div class="popup-actions">
+      <button onclick="confirmDelete()">Delete</button>
+      <button onclick="closeDeletePopup()">Cancel</button>
+    </div>
+
+  </div>
+
+</div>
+
 </body>
 </html>

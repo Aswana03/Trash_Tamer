@@ -156,14 +156,31 @@ function loadBins() {
 
       snapshot.forEach((doc) => {
 
-        const div = document.createElement("div");
-        div.className = "bin-card";
-        div.innerText = doc.id;
+      const binId = doc.id;
 
-        div.onclick = () => selectBin(doc.id);
+      const div = document.createElement("div");
+      div.className = "bin-card";
 
-        binList.appendChild(div);
-      });
+      // 🧱 Bin name
+      const name = document.createElement("span");
+      name.innerText = binId;
+      name.onclick = () => selectBin(binId);
+
+      // 🗑️ Delete icon
+      const del = document.createElement("span");
+      del.innerHTML = "🗑️";
+      del.className = "delete-icon";
+
+      del.onclick = (e) => {
+        e.stopPropagation(); // ❗ prevents opening bin
+        deleteBin(binId);
+      };
+
+      div.appendChild(name);
+      div.appendChild(del);
+
+      binList.appendChild(div);
+    });
 
     });
 }
@@ -234,21 +251,32 @@ function showToast(message, type = "default") {
   }, 3000);
 }
 
-function addBin() {
+function closePopup() {
+  document.getElementById("binPopup").classList.add("hidden");
+}
 
-  const binId = prompt("Enter bin ID (e.g., bin_002)");
-  if (!binId) return;
+function createBin() {
+  const binId = document.getElementById("binInput").value.trim();
+
+  if (!binId) {
+    showToast("Enter valid bin ID", "error");
+    return;
+  }
+
+  const userId = auth.currentUser.uid;
 
   db.collection("users")
-    .doc(currentUser)
+    .doc(userId)
     .collection("bins")
     .doc(binId)
     .set({
       bio: 0,
-      nonBio: 0
+      nonBio: 0,
+      lastUpdated: Date.now()
     })
     .then(() => {
-      showToast("Bin added ✅");
+      showToast("Bin added successfully", "success");
+      closePopup();
       loadBins();
     });
 }
@@ -309,6 +337,10 @@ function resetPassword() {
     });
 }
 
+function addBin() {
+  document.getElementById("binPopup").classList.remove("hidden");
+}
+
 function setActiveNav(element) {
   document.querySelectorAll(".nav-item").forEach(item => {
     item.classList.remove("active");
@@ -341,6 +373,56 @@ function saveNewPassword() {
         showToast("Error: " + error.message);
       });
   }
+}
+
+function deleteBin(binId) {
+
+  const userId = auth.currentUser.uid;
+
+  if (!confirm("Delete this bin?")) return;
+
+  db.collection("users")
+    .doc(userId)
+    .collection("bins")
+    .doc(binId)
+    .delete()
+    .then(() => {
+      showToast("Bin deleted 🗑️", "success");
+      loadBins();
+    })
+    .catch(() => {
+      showToast("Error deleting bin ❌", "error");
+    });
+}
+
+let binToDelete = "";
+
+function deleteBin(binId) {
+  binToDelete = binId;
+  document.getElementById("deletePopup").classList.remove("hidden");
+}
+
+function closeDeletePopup() {
+  document.getElementById("deletePopup").classList.add("hidden");
+}
+
+function confirmDelete() {
+
+  const userId = auth.currentUser.uid;
+
+  db.collection("users")
+    .doc(userId)
+    .collection("bins")
+    .doc(binToDelete)
+    .delete()
+    .then(() => {
+      showToast("Bin deleted 🗑️", "success");
+      closeDeletePopup();
+      loadBins();
+    })
+    .catch(() => {
+      showToast("Error deleting ❌", "error");
+    });
 }
 
 function resetPasswordEmail() {
