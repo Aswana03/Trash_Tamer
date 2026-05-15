@@ -9,16 +9,6 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* ===== BODY ===== */
-body {
-  background: linear-gradient(120deg, #fdfbfb, #ebedee);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  animation: bgMove 6s infinite alternate;
-}
-
 @keyframes bgMove {
   0% { background: linear-gradient(120deg, #fdfbfb, #ebedee); }
   100% { background: linear-gradient(120deg, #e0f7fa, #ffffff); }
@@ -30,13 +20,13 @@ body {
 }
 
 /* ===== CARD ===== */
-.card {
-  width: 330px;
-  padding: 25px;
-  border-radius: 25px;
-  background: white;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-  text-align: center;
+.card{
+    width: 90%;
+    max-width: 380px;
+    padding: 25px;
+    border-radius: 25px;
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }
 
 /* ===== INPUT ===== */
@@ -56,6 +46,14 @@ input {
   margin-top: 5px;
   border-radius: 12px;
   border: 1px solid #ccc;
+}
+
+.center{
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
 input:focus {
@@ -96,10 +94,35 @@ p {
 
 /* ===== APP ===== */
 .app {
-  width: 360px;
-  border-radius: 30px;
-  overflow: hidden;
+  width: 100%;
+  max-width: 380px;
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+
+  margin: auto;
 }
+
+html, body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f4f4f4;
+}
+
 
 /* ===== HEADER ===== */
 .header {
@@ -112,7 +135,6 @@ p {
 
 /* ===== MAIN CARD ===== */
 .main-card {
-  margin: 12px;
   padding: 18px;
   border-radius: 25px;
   background: rgba(255,255,255,0.3);
@@ -126,7 +148,11 @@ p {
 }
 
 .screen.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
 .bin-item {
@@ -541,4 +567,12 @@ p {
 
 .toast.success {
   background: #22c55e;
+}
+
+#loginScreen.screen.active {
+    min-height: 100vh;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
