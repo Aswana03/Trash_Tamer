@@ -97,15 +97,8 @@ p {
   width: 100%;
   max-width: 380px;
   min-height: 100vh;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-
   margin: auto;
+  position: relative;
 }
 
 html, body{
@@ -150,9 +143,9 @@ body {
 .screen.active {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  padding-top: 80px;
+  padding-bottom: 100px;
 }
 
 .bin-item {

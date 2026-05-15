@@ -206,6 +206,7 @@ function selectBin(binId) {
 }
 
 function loadBinData() {
+
   const user = firebase.auth().currentUser;
 
   db.collection("users")
@@ -216,9 +217,25 @@ function loadBinData() {
 
       const data = doc.data();
 
-      updateBinsUI(data.bio, data.nonBio);
+      if (!data) return;
+
+      const now = Date.now();
+      const diff = now - data.lastUpdated;
+
+      // ESP OFFLINE
+      if (diff > 10000) {
+
+        updateBinsUI(0, 0, true);
+
+      } else {
+
+        // ESP ONLINE
+        updateBinsUI(data.bio, data.nonBio);
+
+      }
 
       updateStatus(data.lastUpdated);
+
     });
 }
 
@@ -478,23 +495,49 @@ function forgotPassword() {
 }
 
 function updateStatus(lastUpdated) {
+
   const statusEl = document.getElementById("statusText");
 
   if (!lastUpdated) {
     statusEl.innerHTML = '<span class="dot"></span> OFFLINE';
-    statusEl.classList.remove("online");
+    statusEl.classList.remove("live");
     statusEl.classList.add("offline");
     return;
   }
 
-  // 🔥 Since ESP uses millis OR timestamp, just mark as ONLINE
-  statusEl.innerHTML = '<span class="dot"></span> ONLINE';
-  statusEl.classList.remove("offline");
-  statusEl.classList.add("online");
+  const now = Date.now();
+  const diff = now - lastUpdated;
+
+  if (diff < 10000) {
+
+    statusEl.innerHTML = '<span class="dot"></span> ONLINE';
+    statusEl.classList.remove("offline");
+    statusEl.classList.add("live");
+
+  } else {
+
+    statusEl.innerHTML = '<span class="dot"></span> OFFLINE';
+    statusEl.classList.remove("live");
+    statusEl.classList.add("offline");
+
+  }
 }
 
-function updateBinsUI(bio, nonBio) {
+function updateBinsUI(bio, nonBio, isOffline = false) {
 
+  // OFFLINE MODE
+  if (isOffline) {
+
+    document.getElementById("bioValue").innerText = "0%";
+    document.getElementById("nonBioValue").innerText = "0%";
+
+    document.getElementById("bioFill").style.height = "0%";
+    document.getElementById("nonBioFill").style.height = "0%";
+
+    return;
+  }
+
+  // ONLINE MODE
   document.getElementById("bioValue").innerText = bio + "%";
   document.getElementById("nonBioValue").innerText = nonBio + "%";
 
