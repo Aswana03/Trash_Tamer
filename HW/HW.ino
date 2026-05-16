@@ -5,6 +5,7 @@
 #include <WiFiManager.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <time.h>
 
 
 // ================= OLED CONFIG =================
@@ -190,9 +191,12 @@ void setup() {
   Serial.println("User ID: " + USER_ID);
 
   if (!res) {
-    Serial.println("❌ Failed to connect");
+  Serial.println("❌ Failed to connect");
   } else {
     Serial.println("✅ Connected to WiFi");
+
+    // 🔥 Get real internet time
+    configTime(0, 0, "pool.ntp.org");
   }
 
   pinMode(TRIG_PIN, OUTPUT);

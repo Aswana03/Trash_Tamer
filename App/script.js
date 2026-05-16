@@ -205,6 +205,8 @@ function selectBin(binId) {
   loadBinData(); // load that bin data
 }
 
+let previousLastUpdated = 0;
+
 function loadBinData() {
 
   const user = firebase.auth().currentUser;
@@ -219,22 +221,20 @@ function loadBinData() {
 
       if (!data) return;
 
-      const now = Date.now();
-      const diff = now - data.lastUpdated;
+      // 🔥 ONLINE if millis value changes
+      if (data.lastUpdated !== previousLastUpdated) {
 
-      // ESP OFFLINE
-      if (diff > 10000) {
+        previousLastUpdated = data.lastUpdated;
 
-        updateBinsUI(0, 0, true);
+        updateStatus(true);
+        updateBinsUI(data.bio, data.nonBio);
 
       } else {
 
-        // ESP ONLINE
-        updateBinsUI(data.bio, data.nonBio);
+        updateStatus(false);
+        updateBinsUI(0, 0, true);
 
       }
-
-      updateStatus(data.lastUpdated);
 
     });
 }
@@ -494,21 +494,11 @@ function forgotPassword() {
     });
 }
 
-function updateStatus(lastUpdated) {
+function updateStatus(isOnline) {
 
   const statusEl = document.getElementById("statusText");
 
-  if (!lastUpdated) {
-    statusEl.innerHTML = '<span class="dot"></span> OFFLINE';
-    statusEl.classList.remove("live");
-    statusEl.classList.add("offline");
-    return;
-  }
-
-  const now = Date.now();
-  const diff = now - lastUpdated;
-
-  if (diff < 10000) {
+  if (isOnline) {
 
     statusEl.innerHTML = '<span class="dot"></span> ONLINE';
     statusEl.classList.remove("offline");
@@ -551,7 +541,7 @@ function updateBinsUI(bio, nonBio, isOffline = false) {
     bioNormalShown = false;
   }
 
-  if (bio < 90 && !bioNormalShown) {
+  if (bio > 0 && bio < 90 && !bioNormalShown) {
     showToast("✅ Food bin normal", "success");
     bioNormalShown = true;
     bioAlertShown = false;
