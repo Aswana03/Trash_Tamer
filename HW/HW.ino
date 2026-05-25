@@ -104,18 +104,16 @@ void sendToFirebase(int bio, int nonBio) {
   }
 }
 
-void moveServoSmooth(Servo &servo, int startAngle, int endAngle, int stepDelay) {
-  if (startAngle < endAngle) {
-    for (int angle = startAngle; angle <= endAngle; angle++) {
-      servo.write(angle);
-      delay(stepDelay);
-    }
-  } else {
-    for (int angle = startAngle; angle >= endAngle; angle--) {
-      servo.write(angle);
-      delay(stepDelay);
-    }
-  }
+void stopServo(Servo &servo) {
+  servo.writeMicroseconds(1500);
+}
+
+void rotateForward(Servo &servo) {
+  servo.writeMicroseconds(1570);
+}
+
+void rotateBackward(Servo &servo) {
+  servo.writeMicroseconds(1425);
 }
 
 // ================= SETUP =================
@@ -209,8 +207,18 @@ void setup() {
 
   pinMode(CAM_TRIGGER, OUTPUT);
 
+ // -------- SERVO SETUP --------
+
+  delay(1000); // allow ESP32 power to stabilize
+
   foodServo.attach(FOOD_SERVO_PIN);
   dryServo.attach(DRY_SERVO_PIN);
+
+  // STOP SERVOS IMMEDIATELY
+  foodServo.writeMicroseconds(1500);
+  dryServo.writeMicroseconds(1500);
+
+  delay(500);
 
   pinMode(FOOD_BIN_TRIG, OUTPUT);
   pinMode(FOOD_BIN_ECHO, INPUT);
@@ -219,8 +227,8 @@ void setup() {
   pinMode(DRY_BIN_ECHO, INPUT);
 
   // Initial position (closed)
-  foodServo.write(0);
-  dryServo.write(0);
+  stopServo(foodServo);
+  stopServo(dryServo);
 
   // 🔥 IMPORTANT: prevent floating inputs
   pinMode(FOOD_INPUT, INPUT_PULLDOWN);
@@ -241,7 +249,7 @@ void setup() {
   display.setTextColor(WHITE);
 
   display.setCursor(0, 0);
-  display.println("System Started");
+  display.println("Trash Tamer");
   display.display();
 
   delay(2000);
@@ -400,7 +408,9 @@ void loop() {
         display.println("Opening Lid...");
         display.display();
 
-        moveServoSmooth(foodServo, 0, 180, 10);
+        rotateForward(foodServo);
+        delay(120); // adjust experimentally
+        stopServo(foodServo);
       }
 
       // 🔴 DRY CASE
@@ -421,7 +431,9 @@ void loop() {
         display.println("Opening Lid...");
         display.display();
 
-        moveServoSmooth(dryServo, 0, 180, 10);
+        rotateForward(dryServo);
+        delay(1200);
+        stopServo(dryServo);
       }
       // Keep open for 5 seconds
       delay(5000);
@@ -435,10 +447,14 @@ void loop() {
 
       // 🔥 Return to closed position
       if (isFood) {
-        moveServoSmooth(foodServo, 180, 0, 10);
+        rotateBackward(foodServo);
+        delay(1200);
+        stopServo(foodServo);
       }
       else if (isDry) {
-        moveServoSmooth(dryServo, 180, 0, 10);
+        rotateBackward(dryServo);
+        delay(1200);
+        stopServo(dryServo);
       }
 
       delay(2000);
