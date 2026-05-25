@@ -205,11 +205,13 @@ function selectBin(binId) {
   loadBinData(); // load that bin data
 }
 
-let previousLastUpdated = 0;
 
 function loadBinData() {
 
   const user = firebase.auth().currentUser;
+
+  db.enableNetwork();
+
 
   db.collection("users")
     .doc(user.email.replace(/\./g, "_"))
@@ -217,22 +219,36 @@ function loadBinData() {
     .doc(selectedBin)
     .onSnapshot((doc) => {
 
+      // document deleted
+      if (!doc.exists) {
+
+        updateStatus(false);
+
+        document.getElementById("bioValue").innerText = "0%";
+        document.getElementById("nonBioValue").innerText = "0%";
+
+        document.getElementById("bioFill").style.height = "0%";
+        document.getElementById("nonBioFill").style.height = "0%";
+
+        return;
+      }
+
       const data = doc.data();
 
-      if (!data) return;
+      // 🔥 ALWAYS UPDATE UI
+      updateBinsUI(data.bio, data.nonBio);
 
-      // 🔥 ONLINE if millis value changes
-      if (data.lastUpdated !== previousLastUpdated) {
+      // 🔥 CHECK ONLINE/OFFLINE
+      const currentTime = Date.now();
 
-        previousLastUpdated = data.lastUpdated;
+      // online if updated within 15 sec
+      if (currentTime - data.lastUpdated < 15000) {
 
         updateStatus(true);
-        updateBinsUI(data.bio, data.nonBio);
 
       } else {
 
         updateStatus(false);
-        updateBinsUI(0, 0, true);
 
       }
 
@@ -559,4 +575,16 @@ function updateBinsUI(bio, nonBio, isOffline = false) {
     nonBioNormalShown = true;
     nonBioAlertShown = false;
   }
+}
+
+function syncBin() {
+
+  if (!selectedBin) {
+    showToast("No bin selected");
+    return;
+  }
+
+  loadBinData();
+
+  showToast("Syncing...");
 }

@@ -16,8 +16,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 // ================= PIN CONFIG =================
 
 // 🔹 MAIN ULTRASONIC
-#define TRIG_PIN 5
-#define ECHO_PIN 18
+#define TRIG_PIN 18
+#define ECHO_PIN 5
 
 // 🔹 BIN ULTRASONICS
 #define FOOD_BIN_TRIG 25
@@ -81,11 +81,16 @@ void sendToFirebase(int bio, int nonBio) {
     http.addHeader("Content-Type", "application/json");
     http.addHeader("X-HTTP-Method-Override", "PATCH");
 
+    time_t now;
+    time(&now);
+
+    long long currentMillis = ((long long)now) * 1000;
+
     String payload = "{ \"fields\": { "
-                 "\"bio\": {\"integerValue\": " + String(bio) + "}, "
-                 "\"nonBio\": {\"integerValue\": " + String(nonBio) + "}, "
-                 "\"lastUpdated\": {\"integerValue\": " + String(millis()) + "} "
-                 "} }";
+                "\"bio\": {\"integerValue\": " + String(bio) + "}, "
+                "\"nonBio\": {\"integerValue\": " + String(nonBio) + "}, "
+                "\"lastUpdated\": {\"integerValue\": \"" + String(currentMillis) + "\"} "
+                "} }";
 
     Serial.println("URL: " + url);
     Serial.println("Payload: " + payload);        
