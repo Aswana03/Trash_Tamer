@@ -42,6 +42,8 @@ String USER_ID = "";
 Servo foodServo;
 Servo dryServo;
 
+int lidMoveTime = 2000;
+
 // ================= VARIABLES =================
 long duration;
 float distance;
@@ -108,11 +110,19 @@ void stopServo(Servo &servo) {
   servo.writeMicroseconds(1500);
 }
 
-void rotateForward(Servo &servo) {
+void rotateFoodOpen(Servo &servo) {
+  servo.writeMicroseconds(1425);
+}
+
+void rotateFoodClose(Servo &servo) {
   servo.writeMicroseconds(1570);
 }
 
-void rotateBackward(Servo &servo) {
+void rotateDryOpen(Servo &servo) {
+  servo.writeMicroseconds(1570);
+}
+
+void rotateDryClose(Servo &servo) {
   servo.writeMicroseconds(1425);
 }
 
@@ -296,8 +306,8 @@ void loop() {
   float foodLevel = getDistance(FOOD_BIN_TRIG, FOOD_BIN_ECHO);
   float dryLevel  = getDistance(DRY_BIN_TRIG, DRY_BIN_ECHO);
 
-  int foodPercent = map(foodLevel, 30, 5, 0, 100);
-  int dryPercent  = map(dryLevel, 30, 5, 0, 100);
+  int foodPercent = map(foodLevel, 8, 2, 0, 100);
+  int dryPercent  = map(dryLevel, 8, 2, 0, 100);
 
   foodPercent = constrain(foodPercent, 0, 100);
   dryPercent  = constrain(dryPercent, 0, 100);
@@ -408,8 +418,8 @@ void loop() {
         display.println("Opening Lid...");
         display.display();
 
-        rotateForward(foodServo);
-        delay(120); // adjust experimentally
+        rotateFoodOpen(foodServo);
+        delay(lidMoveTime); // adjust experimentally
         stopServo(foodServo);
       }
 
@@ -431,8 +441,8 @@ void loop() {
         display.println("Opening Lid...");
         display.display();
 
-        rotateForward(dryServo);
-        delay(1200);
+        rotateDryOpen(dryServo);
+        delay(lidMoveTime);
         stopServo(dryServo);
       }
       // Keep open for 5 seconds
@@ -447,13 +457,13 @@ void loop() {
 
       // 🔥 Return to closed position
       if (isFood) {
-        rotateBackward(foodServo);
-        delay(1200);
+        rotateFoodClose(foodServo);
+        delay(lidMoveTime);
         stopServo(foodServo);
       }
       else if (isDry) {
-        rotateBackward(dryServo);
-        delay(1200);
+        rotateDryClose(dryServo);
+        delay(lidMoveTime);
         stopServo(dryServo);
       }
 
