@@ -90,7 +90,7 @@ The system uses an ESP32-CAM for waste identification, ultrasonic sensors for de
 # 🔌 Schematic Diagram
 
 <p align="center">
-  <img src="assets/schematic.png" width="850"/>
+  <img src="assets/Circuit.png" width="850"/>
 </p>
 
 ---
