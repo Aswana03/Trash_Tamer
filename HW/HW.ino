@@ -259,7 +259,8 @@ void setup() {
   display.setTextColor(WHITE);
 
   display.setCursor(0, 0);
-  display.println("Trash Tamer");
+  display.println("Trash");
+  display.println("Tamer");
   display.display();
 
   delay(2000);
